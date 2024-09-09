@@ -1,0 +1,31 @@
+/* TABS styles */
+
+.main-content {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  cursor: pointer;
+  border-radius: 7px;
+  color: #f2f2f2;
+  background-color: rgba(122, 0, 0, 0.3);
+}
+
+.tab-content {
+  border: 1px solid #ddd;
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+}

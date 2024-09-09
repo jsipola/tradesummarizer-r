@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import "./Trades.css";
@@ -6,15 +6,6 @@ import "./Trades.css";
 export interface ApiTrades {
   Ticker: string;
   Transactions: Array<Transaction>;
-}
-
-export interface Trades {
-  Ticker: string;
-  SharesToCount: number;
-  SharesToCountForBuying: number;
-  Transactions: Array<Transaction>;
-  Buy: Array<Transaction>;
-  Sell: Array<Transaction>;
 }
 
 export interface Transaction {
@@ -26,7 +17,7 @@ export interface Transaction {
   Type: string;
 }
 
-function getSum(
+function getSumFromTransaction(
   item: Transaction,
   totals: [number, number, number]
 ): [number, number, number] {
@@ -38,57 +29,6 @@ function getSum(
   }
   return totals;
 }
-
-export const ApiTradesItem: React.FC<ApiTrades> = (item) => {
-  let totals: [number, number, number] = [0, 0, item.Transactions.length];
-  item.Transactions?.forEach((a) => (totals = getSum(a, totals)));
-  //console.log(totals);
-  return (
-    <div>
-      <h1>{item.Ticker}</h1>
-      {item.Transactions && (
-        <>
-          {item.Transactions.map((transaction) => (
-            <TransactionItem key={uuidv4()} transaction={transaction} />
-          ))}
-          <p>Total: {totals[0].toFixed(2)} €</p>
-        </>
-      )}
-    </div>
-  );
-};
-
-export const TradesItem: React.FC<Trades> = (item) => {
-  let reversedTransactions;
-  // Create a shallow copy and reverse the list
-  // since the returned transactions are in descending order
-  if (item.Transactions) {
-    reversedTransactions = item.Transactions.slice().reverse();
-  }
-
-  let totals: [number, number, number] = [0, 0, item.Transactions.length];
-  reversedTransactions?.forEach((a) => (totals = getSum(a, totals)));
-  console.log(totals);
-
-  /*   reversedTransactions = reversedTransactions?.splice(
-    0,
-    reversedTransactions.length - totals[2]
-  ); */
-
-  return (
-    <div>
-      <h1>{item.Ticker}</h1>
-      {reversedTransactions && (
-        <>
-          {reversedTransactions.map((transaction) => (
-            <TransactionItem key={uuidv4()} transaction={transaction} />
-          ))}
-          <p>Total: {totals[0].toFixed(2)} €</p>
-        </>
-      )}
-    </div>
-  );
-};
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -103,6 +43,70 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
       <p>{transaction.Date.toString()}</p>
       <p>{transaction.Shares}</p>
       <p>{transaction.Amount.toFixed(2)} €</p>
+    </div>
+  );
+};
+
+export const TradesTable: React.FC<ApiTrades> = (item) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  let totals: [number, number, number] = [0, 0, item.Transactions.length];
+  item.Transactions?.forEach(
+    (a) => (totals = getSumFromTransaction(a, totals))
+  );
+
+  const toggleTrades = () => {
+    setIsVisible(!isVisible);
+  };
+
+  return (
+    <div>
+      <h2>{item.Ticker}</h2>
+      <table className="tableContainer">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Share #</th>
+            <th>Sum</th>
+          </tr>
+        </thead>
+        <tbody>
+          <>
+            {isVisible ? (
+              <>
+                {item.Transactions.map((transaction) => (
+                  <tr
+                    key={uuidv4()}
+                    className="expandrow"
+                    onClick={toggleTrades}
+                  >
+                    <td>{transaction.Type}</td>
+                    <td>{transaction.Date.toString()}</td>
+                    <td>{transaction.Shares}</td>
+                    <td>
+                      {transaction.Type === "Osto" ? "-" : ""}
+                      {transaction.Amount} €
+                    </td>
+                  </tr>
+                ))}
+              </>
+            ) : (
+              <tr key={uuidv4()} onClick={toggleTrades} className="expandrow">
+                <td colSpan={4}>Expand</td>
+              </tr>
+            )}
+          </>
+        </tbody>
+        <tfoot>
+          <tr key={uuidv4()} className="totalRow">
+            <td>Total</td>
+            <td></td>
+            <td></td>
+            <td>{totals[0].toFixed(2)} €</td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   );
 };

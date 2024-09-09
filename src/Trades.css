@@ -10,3 +10,50 @@
   border-radius: 8px;
   text-align: center;
 }
+
+.tableContainer {
+  margin: 20px;
+  border-collapse: collapse;
+  width: 750px;
+  border: 1px solid black;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.aligner {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableContainer th,
+.tableContainer td {
+  border: 0px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.tableContainer th {
+  background-color: #f2f2f2;
+  color: black;
+}
+
+.tableContainer tbody:hover {
+  background: rgba(122, 0, 0, 0.3);
+}
+
+.tableContainer .expandrow td:hover {
+  cursor: pointer;
+}
+
+.totalRow {
+  border-top: 2px solid black;
+  font-weight: bold;
+}
+
+.tableContainer th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background-color: black;
+  color: white;
+}
