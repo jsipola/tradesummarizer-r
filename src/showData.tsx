@@ -11,10 +11,12 @@ const ShowData: React.FC<FetchDataProps> = ({ tradeData }) => {
       {tradeData &&
         tradeData.map((item) => (
           <>
-            <TradesTable
-              Ticker={item.Ticker}
-              Transactions={item.Transactions}
-            />
+            <div>
+              <TradesTable
+                Ticker={item.Ticker}
+                Transactions={item.Transactions}
+              />
+            </div>
           </>
         ))}
     </div>

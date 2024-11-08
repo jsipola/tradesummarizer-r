@@ -10,7 +10,7 @@ export interface ApiTrades {
 
 export interface Transaction {
   Amount: number;
-  Date: Date;
+  Date: string;
   Isin: string;
   Shares: number;
   Ticker: string;
@@ -29,23 +29,6 @@ function getSumFromTransaction(
   }
   return totals;
 }
-
-interface TransactionItemProps {
-  transaction: Transaction;
-}
-
-export const TransactionItem: React.FC<TransactionItemProps> = ({
-  transaction,
-}) => {
-  return (
-    <div className="grid-container">
-      <p>{transaction.Type}</p>
-      <p>{transaction.Date.toString()}</p>
-      <p>{transaction.Shares}</p>
-      <p>{transaction.Amount.toFixed(2)} €</p>
-    </div>
-  );
-};
 
 export const TradesTable: React.FC<ApiTrades> = (item) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -86,7 +69,7 @@ export const TradesTable: React.FC<ApiTrades> = (item) => {
                     <td>{transaction.Shares}</td>
                     <td>
                       {transaction.Type === "Osto" ? "-" : ""}
-                      {transaction.Amount} €
+                      {transaction.Amount.toFixed(2)} €
                     </td>
                   </tr>
                 ))}

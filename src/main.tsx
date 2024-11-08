@@ -34,17 +34,15 @@ const MainContent: React.FC = () => {
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div>Error loading data</div>;
   }
-
-  const chartData = data ? data.flatMap((a) => a.Transactions) : [];
 
   const renderTabContent = () => {
     switch (activeTab) {
       case "all":
         return <ShowData tradeData={data} />;
       case "graph":
-        return <PnLChartComponent data={chartData} />;
+        return <PnLChartComponent data={data} />;
       default:
         return <>Empty, should not be shown</>;
     }
