@@ -1,6 +1,6 @@
 # Visualize transactions
 
-1. Read data from `/api/validTrades`, served by trade parser app
+1. Read data from `/api/validTrades`, served by [trade parser app](https://github.com/jsipola/tradesummarizer)
 2. Grouped by stock ticker
 
 ## Available Scripts
