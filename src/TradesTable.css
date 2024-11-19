@@ -20,7 +20,14 @@
   overflow: hidden;
 }
 
-.aligner {
+.table-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(750px, 1fr));
+  align-items: start;
+  gap: 15px;
+}
+
+.align-items {
   align-items: center;
   display: flex;
   flex-direction: column;

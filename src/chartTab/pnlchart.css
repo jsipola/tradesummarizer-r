@@ -1,0 +1,20 @@
+.container-doughnut {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+
+.child {
+  color: white;
+  display: grid;
+  align-items: center;
+  justify-content: center;
+}
+
+.text {
+  display: grid; /* Use flexbox for text elements */
+  justify-content: space-between; /* Space text elements evenly */
+  grid-template-columns: 1fr 1fr;
+
+  width: 100%; /* Full width of the child */
+}

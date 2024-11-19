@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ShowData from "./showData";
-import PnLChartComponent from "./pnlchart";
-import { ApiTrades } from "./Trades";
+import TickerTrades from "./TickerTrades";
+import PnLChartComponent from "./chartTab/pnlchart";
 
 import "./main.css";
+import { ApiTrades } from "./helpers/TransactionHelpers";
 
 const MainContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -40,7 +40,7 @@ const MainContent: React.FC = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case "all":
-        return <ShowData tradeData={data} />;
+        return <TickerTrades tradeData={data} />;
       case "graph":
         return <PnLChartComponent data={data} />;
       default:

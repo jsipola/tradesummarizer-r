@@ -1,34 +1,8 @@
 import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import "./Trades.css";
-
-export interface ApiTrades {
-  Ticker: string;
-  Transactions: Array<Transaction>;
-}
-
-export interface Transaction {
-  Amount: number;
-  Date: string;
-  Isin: string;
-  Shares: number;
-  Ticker: string;
-  Type: string;
-}
-
-function getSumFromTransaction(
-  item: Transaction,
-  totals: [number, number, number]
-): [number, number, number] {
-  if (item.Type === "Osto") {
-    return [totals[0] - item.Amount, totals[1] + item.Shares, totals[2] - 1];
-  }
-  if (item.Type === "Myynti" && totals[1] > 0) {
-    return [totals[0] + item.Amount, totals[1] - item.Shares, totals[2] - 1];
-  }
-  return totals;
-}
+import "./TradesTable.css";
+import { ApiTrades, getSumFromTransaction } from "./helpers/TransactionHelpers";
 
 export const TradesTable: React.FC<ApiTrades> = (item) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -43,7 +17,7 @@ export const TradesTable: React.FC<ApiTrades> = (item) => {
   };
 
   return (
-    <div>
+    <div className="align-items">
       <h2>{item.Ticker}</h2>
       <table className="tableContainer">
         <thead>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar, Doughnut, Line } from "react-chartjs-2";
 import {
   Chart,
   ChartData,
@@ -7,7 +7,12 @@ import {
   ComplexFillTarget,
   registerables,
 } from "chart.js";
-import { ApiTrades, Transaction } from "./Trades";
+import {
+  ApiTrades,
+  getSumFromTransaction,
+} from "../helpers/TransactionHelpers";
+
+import "./pnlchart.css";
 
 Chart.register(...registerables);
 
@@ -19,19 +24,6 @@ interface TradeProps {
   Ticker: string;
   Sum: number;
   LastDate: Date;
-}
-
-function getSumFromTransaction(
-  item: Transaction,
-  totals: [number, number, number]
-): [number, number, number] {
-  if (item.Type === "Osto") {
-    return [totals[0] - item.Amount, totals[1] + item.Shares, totals[2] - 1];
-  }
-  if (item.Type === "Myynti" && totals[1] > 0) {
-    return [totals[0] + item.Amount, totals[1] - item.Shares, totals[2] - 1];
-  }
-  return totals;
 }
 
 function parseDate(datestring: string): Date {
@@ -50,8 +42,7 @@ function parseData(data: ApiTrades[] | null): TradeProps[] {
     const tradeData: TradeProps = {
       Ticker: a.Ticker,
       Sum: totals[0],
-      //Total: totals[0],
-      LastDate: parseDate(a.Transactions.at(-1)?.Date as string), //new Date(a.Transactions.at(-1)?.Date as Date),
+      LastDate: parseDate(a.Transactions.at(-1)?.Date as string),
     };
     pointData3.push(tradeData);
   });
@@ -62,11 +53,11 @@ function parseData(data: ApiTrades[] | null): TradeProps[] {
 }
 
 const PnLChartComponent: React.FC<LineChartComponentProps> = ({ data }) => {
-  const [values, _] = useState(() => parseData(data));
+  const [values, setValues] = useState(() => parseData(data));
   const totals: number[] = [];
 
   values.forEach((a, index) => {
-    if (totals.length == 0) {
+    if (totals.length === 0) {
       totals.push(a.Sum);
     } else {
       const val = a.Sum + totals[index - 1];
@@ -83,8 +74,8 @@ const PnLChartComponent: React.FC<LineChartComponentProps> = ({ data }) => {
 
   const resultFiller: ComplexFillTarget = {
     target: "origin",
-    above: "rgba(0,122,0,10)",
-    below: "rgba(122,0,0,10)",
+    above: "rgba(0,255,0,0.2)",
+    below: "rgba(255,0,0,0.2)",
   };
 
   const lineChartData: ChartData<"line", number[]> = {
@@ -96,23 +87,11 @@ const PnLChartComponent: React.FC<LineChartComponentProps> = ({ data }) => {
         fill: resultFiller,
         borderColor: "rgba(75,192,192,1)",
         backgroundColor: "rgba(75,192,192,1)",
-        pointBorderColor: "rgba(75,192,192,1)",
-        pointBackgroundColor: "#fff",
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: "rgba(75,192,192,1)",
-        pointHoverBorderColor: "rgba(220,220,220,1)",
-        pointHoverBorderWidth: 2,
         pointRadius: 3,
         pointHitRadius: 10,
         tension: 0.2,
       },
     ],
-  };
-
-  const lineOptions: ChartOptions<"line"> = {
-    datasets: {
-      line: {},
-    },
   };
 
   const barChartData: ChartData<"bar", number[]> = {
@@ -122,13 +101,22 @@ const PnLChartComponent: React.FC<LineChartComponentProps> = ({ data }) => {
         label: "Per Trade PnL",
         data: sums,
         borderColor: "rgba(75,192,192,1)",
-        backgroundColor: "rgba(75,192,192,1)",
+        backgroundColor: "rgba(75,192,192,0.5)",
       },
     ],
   };
 
-  const options: ChartOptions<"bar"> = {
+  const doughnotChartData = initDoughnutData(values.filter((a) => a.Sum > 0));
+
+  const negDoughnotChartData = initDoughnutData(
+    values.filter((a) => a.Sum <= 0)
+  );
+
+  const options: ChartOptions = {
     datasets: {
+      line: {
+        pointHoverBorderWidth: 5,
+      },
       bar: {
         borderRadius: 5,
       },
@@ -137,10 +125,57 @@ const PnLChartComponent: React.FC<LineChartComponentProps> = ({ data }) => {
 
   return (
     <div>
-      <Line data={lineChartData} options={lineOptions} />
-      <Bar data={barChartData} options={options} />
+      <Line data={lineChartData} options={options as ChartOptions<"line">} />
+      <Bar data={barChartData} options={options as ChartOptions<"bar">} />
+      <div className="container-doughnut ">
+        {doughnotChartData}
+        {negDoughnotChartData}
+      </div>
     </div>
   );
 };
+
+function initDoughnutData(values: TradeProps[]) {
+  const isWinningDoughnut = values[0].Sum > 0;
+  const colors = values.map(
+    () =>
+      "rgba(" +
+      Math.floor(Math.random() * (isWinningDoughnut ? 0 : 255)) +
+      "," +
+      Math.floor(Math.random() * (isWinningDoughnut ? 255 : 0)) +
+      "," +
+      Math.floor(Math.random() * 122) +
+      "," +
+      1 +
+      ")"
+  );
+  const doughnotChartData: ChartData<"doughnut", number[]> = {
+    labels: values.map((a) => a.Ticker),
+    datasets: [
+      {
+        data: values.map((sum) => sum.Sum),
+        backgroundColor: colors,
+      },
+    ],
+  };
+
+  const donutOpts: ChartOptions<"doughnut"> = {
+    plugins: {
+      title: {
+        display: true,
+        text: (isWinningDoughnut ? "Winning" : "Losing") + " trades",
+      },
+    },
+  };
+
+  const total = values.reduce((acc, item) => acc + item.Sum, 0);
+
+  return (
+    <div className="child">
+      <Doughnut data={doughnotChartData} options={donutOpts} />
+      Total {total.toFixed(2)} €
+    </div>
+  );
+}
 
 export default PnLChartComponent;
